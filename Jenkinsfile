@@ -1,10 +1,12 @@
 pipeline {
     agent any
 
-    tools {
-        // Ensure you have a Node.js tool named 'node' in "Manage Jenkins" -> "Tools"
-        // Or remove this block if Node is already in your Mac's system PATH
-        nodejs 'node'
+    // REMOVED the 'tools' section. 
+    // Jenkins will now look for 'npm' in your Mac's system PATH.
+
+    environment {
+        // This ensures Jenkins finds the 'npm' command on your Mac
+        PATH = "/opt/homebrew/bin:/usr/local/bin:$PATH"
     }
 
     stages {
@@ -18,16 +20,14 @@ pipeline {
             parallel {
                 stage('Client Install') {
                     steps {
-                        dir('client') { // Enters the 'client' folder
-                            echo 'Installing Client dependencies...'
+                        dir('client') { 
                             sh 'npm install'
                         }
                     }
                 }
                 stage('Server Install') {
                     steps {
-                        dir('server') { // Enters the 'server' folder
-                            echo 'Installing Server dependencies...'
+                        dir('server') { 
                             sh 'npm install'
                         }
                     }
@@ -40,8 +40,6 @@ pipeline {
                 stage('Client Build') {
                     steps {
                         dir('client') {
-                            echo 'Building React Client...'
-                            // CI=false prevents the build from failing on minor warnings
                             sh 'CI=false npm run build' 
                         }
                     }
@@ -49,9 +47,6 @@ pipeline {
                 stage('Server Start Check') {
                     steps {
                         dir('server') {
-                            echo 'Checking Server...'
-                            // A simple check to ensure no syntax errors exist
-                            // (If you have a test script, change this to 'npm test')
                             sh 'node --check index.js' 
                         }
                     }
